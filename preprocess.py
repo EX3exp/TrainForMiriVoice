@@ -3,6 +3,7 @@ import shutil
 from data import kss
 import hparams as hp
 
+_dataset_name = hp.dataset
 def write_metadata(train, val, out_dir):
     with open(os.path.join(out_dir, 'train.txt'), 'w', encoding='utf-8') as f:
         for m in train:
@@ -41,7 +42,7 @@ def main():
         os.system('unzip {} -d {}'.format(os.path.join(textgrid_path, textgrid_name), os.path.join(out_dir,textgrid_name.replace(".zip",""))))
 
 
-    if "moon" in hp.dataset:
+    if _dataset_name in hp.dataset:
         # kss version 1.3
         # if "v.1.3" in meta:
         # if not os.path.exists(os.path.join(in_dir, "wavs_bak")):
