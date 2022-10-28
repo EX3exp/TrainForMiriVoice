@@ -11,7 +11,7 @@ from jamo import h2j
 import codecs
 import hparams as hp
 from shutil import move
-
+mirivoice_directory_path = '/content/drive/MyDrive/MiriVoice'
 from sklearn.preprocessing import StandardScaler
 
 def prepare_align(in_dir, meta):
@@ -71,10 +71,10 @@ def build_from_path(in_dir, out_dir, meta):
 
 def process_utterance(in_dir, out_dir, basename, scalers):
     wav_path = os.path.join(in_dir, 'wavs', f'{basename}')
-    textgrid_name=hp.textgrid_name.replace(".zip","")
+    textgrid_name= basename.replace('wav', 'TextGrid')
 
     # Get alignments
-    textgrid = tgt.io.read_textgrid(tg_path)
+    textgrid = tgt.io.read_textgrid(f'{mirivoice_directory_path}/Dataset/PreprocessedDatas/TextGrids/{textgrid_name}')
     phone, duration, start, end = get_alignment(textgrid.get_tier_by_name('phones'))
     print("phone : {}\nduration: {}\nstart : {}\n,end : {}\n".format(phone,duration,start,end))
 
