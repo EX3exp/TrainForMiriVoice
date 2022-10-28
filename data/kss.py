@@ -10,6 +10,7 @@ import hparams as hp
 from jamo import h2j
 import codecs
 import hparams as hp
+from shutil import move
 
 from sklearn.preprocessing import StandardScaler
 
@@ -26,7 +27,8 @@ def prepare_align(in_dir, meta):
 
 def build_from_path(in_dir, out_dir, meta):
     train, val = list(), list()
-
+    
+    
     scalers = [StandardScaler(copy=False) for _ in range(3)]	# scalers for mel, f0, energy
 
     n_frames = 0
@@ -34,7 +36,9 @@ def build_from_path(in_dir, out_dir, meta):
         for file in files:
             if '.wav' in file:
                 val_list.append(file)
-        
+                move(os.path.join(in_dir, file), os.path.join(in_dir, 'wavs'))
+                move(os.path.join(in_dir, file.replace('wav', 'lab')), os.path.join(in_dir, 'wavs'))
+                
     with open(os.path.join(in_dir, meta)) as f:
         for index, line in enumerate(f):
 
