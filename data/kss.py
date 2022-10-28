@@ -40,27 +40,26 @@ def build_from_path(in_dir, out_dir, meta):
                 move(os.path.join(in_dir, 'val', file.replace('wav', 'lab')), os.path.join(in_dir, 'wavs'))
                 
     with open(os.path.join(in_dir, meta)) as f:
-        for index, line in enumerate(f):
+      meta_list = f.read().strip().splitlines()
+    print(meta_list)
+    for index, line in enumerate(meta_list):
+      basename, text = line.strip().split('|')
+      ret = process_utterance(in_dir, out_dir, basename, scalers)
 
-            parts = line.strip().split('|')
-            basename, text = parts[0], parts[1]
-
-            ret = process_utterance(in_dir, out_dir, basename, scalers)
-
-            if ret is None:
-                continue
-            else:
-                info, n = ret
+      if ret is None:
+        continue
+      else:
+        info, n = ret
             
-            if basename in val_list:
-                val.append(info)
-            else:
-                train.append(info)
+      if basename in val_list:
+        val.append(info)
+      else:
+        train.append(info)
 
-            if index % 100 == 0:
-                print("Done %d" % index)
+      if index % 100 == 0:
+          print("Done %d" % index)
 
-            n_frames += n
+      n_frames += n
 
     param_list = [np.array([scaler.mean_, scaler.scale_]) for scaler in scalers]
     param_name_list = ['mel_stat.npy', 'f0_stat.npy', 'energy_stat.npy']
