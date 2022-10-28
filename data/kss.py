@@ -36,8 +36,8 @@ def build_from_path(in_dir, out_dir, meta):
         for file in files:
             if '.wav' in file:
                 val_list.append(file)
-                move(os.path.join(in_dir, file), os.path.join(in_dir, 'wavs'))
-                move(os.path.join(in_dir, file.replace('wav', 'lab')), os.path.join(in_dir, 'wavs'))
+                move(os.path.join(in_dir, 'val', file), os.path.join(in_dir, 'wavs'))
+                move(os.path.join(in_dir, 'val', file.replace('wav', 'lab')), os.path.join(in_dir, 'wavs'))
                 
     with open(os.path.join(in_dir, meta)) as f:
         for index, line in enumerate(f):
