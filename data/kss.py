@@ -26,7 +26,7 @@ def prepare_align(in_dir, meta):
                 f1.write(text)
 
 def build_from_path(in_dir, out_dir, meta):
-    train, val = list(), list()
+    train, val, val_list = list(), list(), list()
     
     
     scalers = [StandardScaler(copy=False) for _ in range(3)]	# scalers for mel, f0, energy
