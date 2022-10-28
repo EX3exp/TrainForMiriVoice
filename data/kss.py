@@ -66,17 +66,9 @@ def build_from_path(in_dir, out_dir, meta):
 
 
 def process_utterance(in_dir, out_dir, basename, scalers):
-    wav_bak_basename=basename.replace('.wav','')
-    basename = wav_bak_basename[2:]
-    wav_bak_path = os.path.join(in_dir, "wavs_bak", "{}.wav".format(wav_bak_basename))
-    wav_path = os.path.join(in_dir, 'wavs', '{}.wav'.format(basename))
+    wav_path = os.path.join(in_dir, 'wavs', f'{basename}')
     textgrid_name=hp.textgrid_name.replace(".zip","")
 
-    # Convert kss data into PCM encoded wavs
-    if not os.path.isfile(wav_path):
-        os.system("ffmpeg -i {} -ac 1 -ar 22050 {}".format(wav_bak_path, wav_path))    
-    tg_path = os.path.join(out_dir, textgrid_name, '{}.TextGrid'.format(basename)) 
-    
     # Get alignments
     textgrid = tgt.io.read_textgrid(tg_path)
     phone, duration, start, end = get_alignment(textgrid.get_tier_by_name('phones'))
