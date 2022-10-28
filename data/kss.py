@@ -33,15 +33,16 @@ def build_from_path(in_dir, out_dir, meta):
 
     n_frames = 0
     for root, directories, files in os.walk(os.path.join(in_dir, 'val')):
-        for file in files:
-            if '.wav' in file:
-              val_list.append(file)
-              move(os.path.join(in_dir, 'val', file), os.path.join(in_dir, 'wavs'))
-              move(os.path.join(in_dir, 'val', file.replace('wav', 'lab')), os.path.join(in_dir, 'wavs'))
-                
+      for file in files:
+          if '.wav' in file:
+            val_list.append(file)
+            move(os.path.join(in_dir, 'val', file), os.path.join(in_dir, 'wavs'))
+            move(os.path.join(in_dir, 'val', file.replace('wav', 'lab')), os.path.join(in_dir, 'wavs'))
+
+    print(val_list)   
     with open(os.path.join(in_dir, meta)) as f:
       meta_list = f.read().strip().splitlines()
-    print(meta_list)
+
     for index, line in enumerate(meta_list):
       basename, text = line.strip().split('|')
       ret = process_utterance(in_dir, out_dir, basename, scalers)
