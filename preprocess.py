@@ -41,7 +41,7 @@ def main():
     if not os.path.exists(os.path.join(out_dir, textgrid_name.replace(".zip", ""))):
         os.system('unzip {} -d {}'.format(os.path.join(textgrid_path, textgrid_name), os.path.join(out_dir,textgrid_name.replace(".zip",""))))
 
-        train, val = kss.build_from_path(in_dir, out_dir, meta)
+    train, val = kss.build_from_path(in_dir, out_dir, meta)
 
     write_metadata(train, val, out_dir)
     
