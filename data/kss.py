@@ -30,7 +30,11 @@ def build_from_path(in_dir, out_dir, meta):
     scalers = [StandardScaler(copy=False) for _ in range(3)]	# scalers for mel, f0, energy
 
     n_frames = 0
-    
+    for root, directories, files in os.walk(os.path.join(in_dir, 'val')):
+        for file in files:
+            if '.wav' in file:
+                val_list.append(file)
+        
     with open(os.path.join(in_dir, meta)) as f:
         for index, line in enumerate(f):
 
@@ -44,7 +48,7 @@ def build_from_path(in_dir, out_dir, meta):
             else:
                 info, n = ret
             
-            if basename[0] == '1':
+            if basename in val_list:
                 val.append(info)
             else:
                 train.append(info)
