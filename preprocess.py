@@ -3,7 +3,6 @@ import shutil
 from data import kss
 import hparams as hp
 
-_dataset_name = hp.dataset
 def write_metadata(train, val, out_dir):
     with open(os.path.join(out_dir, 'train.txt'), 'w', encoding='utf-8') as f:
         for m in train:
@@ -19,28 +18,33 @@ def main():
     textgrid_name = hp.textgrid_name
     textgrid_path=hp.textgrid_path
 
+    #makes dirs of preprocessed data
     mel_out_dir = os.path.join(out_dir, "mel")
-    if not os.path.exists(mel_out_dir):
-        os.makedirs(mel_out_dir, exist_ok=True)
+    os.makedirs(mel_out_dir, exist_ok=True)
+    print(f">> {mel_out_dir} exists currently.")
 
     ali_out_dir = os.path.join(out_dir, "alignment")
-    if not os.path.exists(ali_out_dir):
-        os.makedirs(ali_out_dir, exist_ok=True)
+    os.makedirs(ali_out_dir, exist_ok=True)
+    print(f">> {ali_out_dir} exists currently.")
 
     f0_out_dir = os.path.join(out_dir, "f0")
-    if not os.path.exists(f0_out_dir):
-        os.makedirs(f0_out_dir, exist_ok=True)
+    os.makedirs(f0_out_dir, exist_ok=True)
+    print(f">> {f0_out_dir} exists currently.")
 
     energy_out_dir = os.path.join(out_dir, "energy")
-    if not os.path.exists(energy_out_dir):
-        os.makedirs(energy_out_dir, exist_ok=True)
+    os.makedirs(energy_out_dir, exist_ok=True)
+    print(f">> {energy_out_dir} exists currently.")
 
-    # if os.path.isfile(textgrid_name):
-    #     os.system('mv ./{} {}'.format(textgrid_name, out_dir))
-
-    if not os.path.exists(os.path.join(out_dir, textgrid_name.replace(".zip", ""))):
+    #check and unzip TextGrids
+    textgrids_dir = os.path.join(out_dir, textgrid_name.replace(".zip", ""))
+    
+    if os.path.exists(textgrids_dir):
+        print(f">> {textgrids_dir} exists currently.") 
+    else:
+        print(f">> {textgrids_dir} not exists, Unzippng {out_dir}{textgrid_name}.") 
         os.system('unzip {} -d {}'.format(os.path.join(textgrid_path, textgrid_name), os.path.join(out_dir,textgrid_name.replace(".zip",""))))
-
+        print(f'>> Unzipped {out_dir}{textgrid_name} successfully.')
+        
     train, val = kss.build_from_path(in_dir, out_dir, meta)
 
     write_metadata(train, val, out_dir)
