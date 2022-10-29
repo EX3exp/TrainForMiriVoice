@@ -41,9 +41,9 @@ def main():
     if os.path.exists(textgrids_dir):
         print(f">> {textgrids_dir} exists currently.") 
     else:
-        print(f">> {textgrids_dir} not exists, Unzippng {out_dir}{textgrid_name}.") 
-        os.system('unzip {} -d {}'.format(os.path.join(textgrid_path, textgrid_name), os.path.join(out_dir,textgrid_name.replace(".zip",""))))
-        print(f'>> Unzipped {out_dir}{textgrid_name} successfully.')
+        print(f">> {textgrids_dir} not exists, Unzippng {textgrid_path}{textgrid_name}.") 
+        os.system(f'unzip {os.path.join(textgrid_path, textgrid_name)} -d {os.path.join(out_dir,textgrid_name.replace(".zip",""))}')
+        print(f'>> Unzipped {textgrid_path}{textgrid_name} successfully.')
         
     train, val = kss.build_from_path(in_dir, out_dir, meta)
 
