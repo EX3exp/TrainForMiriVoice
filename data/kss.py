@@ -42,7 +42,7 @@ def build_from_path(in_dir, out_dir, meta):
       meta_list[i] = line.strip()
         
     meta_max_num = len(meta_list)
-    print(f"Read metadata successfully: {meta_max_num} lines exists.\n")
+    print(f"Read metadata successfully: {meta_max_num} lines exists.\n-----")
     
     for index, line in enumerate(meta_list):
         basename, text = line.split('|')   
@@ -50,20 +50,20 @@ def build_from_path(in_dir, out_dir, meta):
         ret = process_utterance(in_dir, out_dir, basename, scalers)
 
         if ret is None:
-            print("Notice: While processing utterance, returned None.\n")
+            print("Notice: While processing utterance, returned None.\n-----")
             continue
         else:
             info, n = ret
       
         if basename != None and basename in val_list:
             val.append(info)
-            print('>> detected: validation sentence.\n')
+            print('>> detected: validation sentence.\n-----')
 
         elif basename != None: 
             train.append(info)
-            print('>> detected: train sentence.\n')
+            print('>> detected: train sentence.\n-----')
         else:
-            print('>> detected: None\n')
+            print('>> detected: None\n-----')
       
     n_frames += n
     if len(val) == 0:
@@ -113,23 +113,23 @@ def process_utterance(in_dir, out_dir, basename, scalers):
     f0, energy = average_by_duration(f0, duration), average_by_duration(energy, duration)
 
     if mel_spectrogram.shape[1] >= hp.max_seq_len:
-        print("Notice: {basename}'s Mel Spectogram is longer than max sequence length!")
+        print(f"Notice: {basename}'s Mel Spectogram is longer than max sequence length!")
         return None
 
     # Save alignment
-    ali_filename = '{}-ali-{}.npy'.format(hp.dataset, basename)
+    ali_filename = f'{hp.dataset}-ali-{basename}.npy')
     np.save(os.path.join(out_dir, 'alignment', ali_filename), duration, allow_pickle=False)
 
     # Save fundamental prequency
-    f0_filename = '{}-f0-{}.npy'.format(hp.dataset, basename)
+    f0_filename = f'{hp.dataset}-f0-{basename}.npy')
     np.save(os.path.join(out_dir, 'f0', f0_filename), f0, allow_pickle=False)
 
     # Save energy
-    energy_filename = '{}-energy-{}.npy'.format(hp.dataset, basename)
+    energy_filename = f'{hp.dataset}-energy-{basename}.npy')
     np.save(os.path.join(out_dir, 'energy', energy_filename), energy, allow_pickle=False)
 
     # Save spectrogram
-    mel_filename = '{}-mel-{}.npy'.format(hp.dataset, basename)
+    mel_filename = f'{hp.dataset}-mel-{basename}.npy')
     np.save(os.path.join(out_dir, 'mel', mel_filename), mel_spectrogram.T, allow_pickle=False)
    
     mel_scaler, f0_scaler, energy_scaler = scalers
