@@ -14,19 +14,8 @@ from shutil import rmtree, move
 mirivoice_directory_path = '/content/drive/MyDrive/MiriVoice'
 from sklearn.preprocessing import StandardScaler
 
-def prepare_align(in_dir, meta):
-    with open(os.path.join(in_dir, meta), encoding='utf-8') as f:
-        for line in f:
-            basename, text = line.split('|')
-
-            basename=basename.replace('.wav','.txt')
-            
-            with open(os.path.join(in_dir,'wavs',basename),'w') as f1:
-                f1.write(text)
-
 def build_from_path(in_dir, out_dir, meta):
     train, val, val_list = list(), list(), list()
-    
     
     scalers = [StandardScaler(copy=False) for _ in range(3)]	# scalers for mel, f0, energy
 
@@ -45,7 +34,7 @@ def build_from_path(in_dir, out_dir, meta):
             files_from_val += 1
      
     if files_from_val != 0:
-        shutil.rmtree(os.path.join(in_dir, 'val'))
+        rmtree(os.path.join(in_dir, 'val'))
         print("{os.path.join(in_dir, 'val')}: Directory removed successfully.")
         
     #move files in train to WavsAndLabs and remove train folder
@@ -59,7 +48,7 @@ def build_from_path(in_dir, out_dir, meta):
             files_from_train += 1
      
     if files_from_train != 0:
-        shutil.rmtree(os.path.join(in_dir, 'train'))
+        rmtree(os.path.join(in_dir, 'train'))
         print("{os.path.join(in_dir, 'train')}: Directory removed successfully.")
         
        
@@ -90,7 +79,7 @@ def build_from_path(in_dir, out_dir, meta):
             print('>> detected: train sentence.')
                 
       
-      n_frames += n
+    n_frames += n
     if len(val) == 0:
         print("Notice: There's no validation sentences in your dataset. plz check.")
     if len(train) == 0:
