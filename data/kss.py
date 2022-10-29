@@ -10,15 +10,14 @@ import hparams as hp
 from jamo import h2j
 import codecs
 import hparams as hp
-from shutil import move
+from shutil import rmtree, move
 mirivoice_directory_path = '/content/drive/MyDrive/MiriVoice'
 from sklearn.preprocessing import StandardScaler
 
 def prepare_align(in_dir, meta):
     with open(os.path.join(in_dir, meta), encoding='utf-8') as f:
         for line in f:
-            parts = line.strip().split('|')
-            basename, text = parts[0], parts[1]
+            basename, text = line.split('|')
 
             basename=basename.replace('.wav','.txt')
             
@@ -32,36 +31,71 @@ def build_from_path(in_dir, out_dir, meta):
     scalers = [StandardScaler(copy=False) for _ in range(3)]	# scalers for mel, f0, energy
 
     n_frames = 0
+    
+    
+    #move files in val to WavsAndLabs and remove val folder
+    files_from_val = 0
     for root, directories, files in os.walk(os.path.join(in_dir, 'val')):
       for file in files:
           if '.wav' in file:
             val_list.append(file)
-            move(os.path.join(in_dir, 'val', file), os.path.join(in_dir, 'wavs'))
-            move(os.path.join(in_dir, 'val', file.replace('wav', 'lab')), os.path.join(in_dir, 'wavs'))
-
-    print(val_list)   
+            print(f"{file} >>> Changing directory to WavsAndLabs from val...")
+            move(os.path.join(in_dir, 'val', file), os.path.join(in_dir, 'WavsAndLabs'))
+            move(os.path.join(in_dir, 'val', file.replace('wav', 'lab')), os.path.join(in_dir, 'WavsAndLabs'))
+            files_from_val += 1
+     
+    if files_from_val != 0:
+        shutil.rmtree(os.path.join(in_dir, 'val'))
+        print("{os.path.join(in_dir, 'val')}: Directory removed successfully.")
+        
+    #move files in train to WavsAndLabs and remove train folder
+    files_from_train = 0
+    for root, directories, files in os.walk(os.path.join(in_dir, 'train')):
+      for file in files:
+          if '.wav' in file:
+            print(f"{file} >>> Changing directory to WavsAndLabs from train...")
+            move(os.path.join(in_dir, 'train', file), os.path.join(in_dir, 'WavsAndLabs'))
+            move(os.path.join(in_dir, 'train', file.replace('wav', 'lab')), os.path.join(in_dir, 'WavsAndLabs'))
+            files_from_train += 1
+     
+    if files_from_train != 0:
+        shutil.rmtree(os.path.join(in_dir, 'train'))
+        print("{os.path.join(in_dir, 'train')}: Directory removed successfully.")
+        
+       
+    #collect validations and trains       
     with open(os.path.join(in_dir, meta)) as f:
-      meta_list = f.read().strip().splitlines()
-
+        meta_list = f.readlines()
+        
+    meta_max_num = len(meta_list)
+    print("Read metadata successfully: {meta_max_num}lines exists.")
+    
     for index, line in enumerate(meta_list):
-      basename, text = line.strip().split('|')
-      ret = process_utterance(in_dir, out_dir, basename, scalers)
+        basename, text = line.split('|')   
+        print('** Process: {index + 1} / {meta_max_num}')
+        ret = process_utterance(in_dir, out_dir, basename, scalers)
 
-      if ret is None:
-        continue
-      else:
-        info, n = ret
-            
-      if basename in val_list:
-        val.append(info)
-      else:
-        train.append(info)
+        if ret is None:
+            print("Notice: While processing utterance, returned None.")
+            continue
+        else:
+            info, n = ret
+      
+        if basename in val_list:
+            val.append(info)
+            print('>> detected: validation sentence.')
 
-      if index % 100 == 0:
-          print("Done %d" % index)
-
+        else: 
+            train.append(info)
+            print('>> detected: train sentence.')
+                
+      
       n_frames += n
-
+    if len(val) == 0:
+        print("Notice: There's no validation sentences in your dataset. plz check.")
+    if len(train) == 0:
+        print("Notice: There's no train sentences in your dataset. plz check.")
+        
     param_list = [np.array([scaler.mean_, scaler.scale_]) for scaler in scalers]
     param_name_list = ['mel_stat.npy', 'f0_stat.npy', 'energy_stat.npy']
     [np.save(os.path.join(out_dir, param_name), param_list[idx]) for idx, param_name in enumerate(param_name_list)]
@@ -76,7 +110,7 @@ def process_utterance(in_dir, out_dir, basename, scalers):
     # Get alignments
     textgrid = tgt.io.read_textgrid(f'{mirivoice_directory_path}/Dataset/PreprocessedDatas/TextGrids/{textgrid_name}')
     phone, duration, start, end = get_alignment(textgrid.get_tier_by_name('phones'))
-    print("phone : {}\nduration: {}\nstart : {}\n,end : {}\n".format(phone,duration,start,end))
+    print(f"phone : {phone}\nduration: {duration}\nstart : {start}\n,end : {end}\n")
 
     text = '{'+ '}{'.join(phone) + '}' # '{A}{B}{$}{C}', $ represents silent phones
     text = text.replace('{$}', ' ')    # '{A}{B} {C}'
@@ -84,6 +118,7 @@ def process_utterance(in_dir, out_dir, basename, scalers):
 
 
     if start >= end:
+        print(f"Notice: {basename} has no length!")
         return None
 
     # Read and trim wav files
@@ -103,6 +138,7 @@ def process_utterance(in_dir, out_dir, basename, scalers):
     f0, energy = average_by_duration(f0, duration), average_by_duration(energy, duration)
 
     if mel_spectrogram.shape[1] >= hp.max_seq_len:
+        print("Notice: {basename}'s Mel Spectogram is longer than max sequence length!")
         return None
 
     # Save alignment
