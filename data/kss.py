@@ -61,7 +61,7 @@ def build_from_path(in_dir, out_dir, meta):
     
     for index, line in enumerate(meta_list):
         basename, text = line.split('|')   
-        print('** Process: {index + 1} / {meta_max_num}')
+        print(f'** Process: {index + 1} / {meta_max_num}')
         ret = process_utterance(in_dir, out_dir, basename, scalers)
 
         if ret is None:
@@ -70,14 +70,15 @@ def build_from_path(in_dir, out_dir, meta):
         else:
             info, n = ret
       
-        if basename in val_list:
+        if basename != None and basename in val_list:
             val.append(info)
             print('>> detected: validation sentence.')
 
-        else: 
+        elif basename != None: 
             train.append(info)
             print('>> detected: train sentence.')
-                
+        else:
+            print('>> detected: None')
       
     n_frames += n
     if len(val) == 0:
@@ -88,8 +89,8 @@ def build_from_path(in_dir, out_dir, meta):
     param_list = [np.array([scaler.mean_, scaler.scale_]) for scaler in scalers]
     param_name_list = ['mel_stat.npy', 'f0_stat.npy', 'energy_stat.npy']
     [np.save(os.path.join(out_dir, param_name), param_list[idx]) for idx, param_name in enumerate(param_name_list)]
-
-    return [r for r in train if r is not None], [r for r in val if r is not None]
+    
+    return train, val
 
 
 def process_utterance(in_dir, out_dir, basename, scalers):
