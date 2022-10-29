@@ -21,7 +21,7 @@ def make_val_list(val_zip_path):
     
     for i, filename in enumerate(val_list):
         if not filename.endswith('.wav'):
-            del val_zip[i]
+            del val_list[i]
             
     return val_list    
 
