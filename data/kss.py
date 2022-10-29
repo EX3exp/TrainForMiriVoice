@@ -93,7 +93,7 @@ def build_from_path(in_dir, out_dir, meta):
 
 
 def process_utterance(in_dir, out_dir, basename, scalers):
-    wav_path = os.path.join(in_dir, 'wavs', f'{basename}')
+    wav_path = os.path.join(in_dir, 'WavsAndLabs', f'{basename}')
     textgrid_name= basename.replace('wav', 'TextGrid')
 
     # Get alignments
