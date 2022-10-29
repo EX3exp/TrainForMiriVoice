@@ -10,81 +10,66 @@ import hparams as hp
 from jamo import h2j
 import codecs
 import hparams as hp
-from shutil import rmtree, move
-mirivoice_directory_path = '/content/drive/MyDrive/MiriVoice'
 from sklearn.preprocessing import StandardScaler
+from zipfile import ZipFile 
+
+mirivoice_directory_path = '/content/drive/MyDrive/MiriVoice'
+
+def make_val_list(val_zip_path):
+    with ZipFile(val_zip_path, 'r') as val_zip:
+        val_list = val_zip.namelist()
+    
+    for i, filename in enumerate(val_list):
+        if not filename.endswith('.wav'):
+            del val_zip[i]
+            
+    return val_list    
+
 
 def build_from_path(in_dir, out_dir, meta):
-    train, val, val_list = list(), list(), list()
-    
+    train, val = list(), list()
+    val_list = make_val_list(os.path.join(in_dir, 'val.zip'))
     scalers = [StandardScaler(copy=False) for _ in range(3)]	# scalers for mel, f0, energy
 
     n_frames = 0
     
-    
-    #move files in val to WavsAndLabs and remove val folder
-    files_from_val = 0
-    for root, directories, files in os.walk(os.path.join(in_dir, 'val')):
-      for file in files:
-          if '.wav' in file:
-            val_list.append(file)
-            print(f"{file} >>> Changing directory to WavsAndLabs from val...")
-            move(os.path.join(in_dir, 'val', file), os.path.join(in_dir, 'WavsAndLabs'))
-            move(os.path.join(in_dir, 'val', file.replace('wav', 'lab')), os.path.join(in_dir, 'WavsAndLabs'))
-            files_from_val += 1
-     
-    if files_from_val != 0:
-        rmtree(os.path.join(in_dir, 'val'))
-        print("{os.path.join(in_dir, 'val')}: Directory removed successfully.")
-        
-    #move files in train to WavsAndLabs and remove train folder
-    files_from_train = 0
-    for root, directories, files in os.walk(os.path.join(in_dir, 'train')):
-      for file in files:
-          if '.wav' in file:
-            print(f"{file} >>> Changing directory to WavsAndLabs from train...")
-            move(os.path.join(in_dir, 'train', file), os.path.join(in_dir, 'WavsAndLabs'))
-            move(os.path.join(in_dir, 'train', file.replace('wav', 'lab')), os.path.join(in_dir, 'WavsAndLabs'))
-            files_from_train += 1
-     
-    if files_from_train != 0:
-        rmtree(os.path.join(in_dir, 'train'))
-        print("{os.path.join(in_dir, 'train')}: Directory removed successfully.")
-        
-       
+           
     #collect validations and trains       
     with open(os.path.join(in_dir, meta)) as f:
         meta_list = f.readlines()
+    
+    for i, line in enumerate(meta_list):
+      meta_list[i] = line.strip()
         
     meta_max_num = len(meta_list)
-    print("Read metadata successfully: {meta_max_num}lines exists.")
+    print(f"Read metadata successfully: {meta_max_num} lines exists.\n")
     
     for index, line in enumerate(meta_list):
         basename, text = line.split('|')   
-        print(f'** Process: {index + 1} / {meta_max_num}')
+        print(f'\n** Process: {index + 1} / {meta_max_num}')
         ret = process_utterance(in_dir, out_dir, basename, scalers)
 
         if ret is None:
-            print("Notice: While processing utterance, returned None.")
+            print("Notice: While processing utterance, returned None.\n")
             continue
         else:
             info, n = ret
       
         if basename != None and basename in val_list:
             val.append(info)
-            print('>> detected: validation sentence.')
+            print('>> detected: validation sentence.\n')
 
         elif basename != None: 
             train.append(info)
-            print('>> detected: train sentence.')
+            print('>> detected: train sentence.\n')
         else:
-            print('>> detected: None')
+            print('>> detected: None\n')
       
     n_frames += n
     if len(val) == 0:
-        print("Notice: There's no validation sentences in your dataset. plz check.")
+        print(f"\nNotice: There's no validation sentences in your dataset. plz check.\n")
     if len(train) == 0:
-        print("Notice: There's no train sentences in your dataset. plz check.")
+        print(f"\nNotice: There's no train sentences in your dataset. plz check.\n")
         
     param_list = [np.array([scaler.mean_, scaler.scale_]) for scaler in scalers]
     param_name_list = ['mel_stat.npy', 'f0_stat.npy', 'energy_stat.npy']
