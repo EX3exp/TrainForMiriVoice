@@ -48,14 +48,20 @@ def main(args):
     checkpoint_path = os.path.join(hp.checkpoint_path)
     try:
         checkpoint = torch.load(os.path.join(
-            checkpoint_path, 'checkpoint_{}.pth.tar'.format(args.restore_step)))
+            hp.pretrained_model_path, hp.pretrained_model_name))
         model.load_state_dict(checkpoint['model'])
         optimizer.load_state_dict(checkpoint['optimizer'])
-        print("\n---Model Restored at Step {}---\n".format(args.restore_step))
+        print(f"\n---Start Training with pretrained model: {hp.pretrained_model_name}")
     except:
         print("\n---Start New Training---\n")
         if not os.path.exists(checkpoint_path):
             os.makedirs(checkpoint_path)
+        else:
+          checkpoint = torch.load(os.path.join(
+            checkpoint_path, 'checkpoint_{}.pth.tar'.format(args.restore_step)))
+        model.load_state_dict(checkpoint['model'])
+        optimizer.load_state_dict(checkpoint['optimizer'])
+        print("\n---Model Restored at Step {}---\n".format(args.restore_step))
 
     # read params
     mean_mel, std_mel = torch.tensor(np.load(os.path.join(hp.preprocessed_path, "mel_stat.npy")), dtype=torch.float).to(device)
