@@ -58,10 +58,10 @@ def main(args):
             os.makedirs(checkpoint_path)
         else:
           checkpoint = torch.load(os.path.join(
-            checkpoint_path, 'checkpoint_{}.pth.tar'.format(args.restore_step)))
+            checkpoint_path, 'checkpoint_{args.restore_step}.pth.tar'))
         model.load_state_dict(checkpoint['model'])
         optimizer.load_state_dict(checkpoint['optimizer'])
-        print("\n---Model Restored at Step {}---\n".format(args.restore_step))
+        print("\n---Model Restored at Step {args.restore_step}---\n")
 
     # read params
     mean_mel, std_mel = torch.tensor(np.load(os.path.join(hp.preprocessed_path, "mel_stat.npy")), dtype=torch.float).to(device)
