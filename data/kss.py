@@ -117,19 +117,19 @@ def process_utterance(in_dir, out_dir, basename, scalers):
         return None
 
     # Save alignment
-    ali_filename = f'{hp.dataset}-ali-{basename}.npy')
+    ali_filename = f'{hp.dataset}-ali-{basename}.npy'
     np.save(os.path.join(out_dir, 'alignment', ali_filename), duration, allow_pickle=False)
 
     # Save fundamental prequency
-    f0_filename = f'{hp.dataset}-f0-{basename}.npy')
+    f0_filename = f'{hp.dataset}-f0-{basename}.npy'
     np.save(os.path.join(out_dir, 'f0', f0_filename), f0, allow_pickle=False)
 
     # Save energy
-    energy_filename = f'{hp.dataset}-energy-{basename}.npy')
+    energy_filename = f'{hp.dataset}-energy-{basename}.npy'
     np.save(os.path.join(out_dir, 'energy', energy_filename), energy, allow_pickle=False)
 
     # Save spectrogram
-    mel_filename = f'{hp.dataset}-mel-{basename}.npy')
+    mel_filename = f'{hp.dataset}-mel-{basename}.npy'
     np.save(os.path.join(out_dir, 'mel', mel_filename), mel_spectrogram.T, allow_pickle=False)
    
     mel_scaler, f0_scaler, energy_scaler = scalers
